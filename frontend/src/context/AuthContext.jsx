@@ -9,25 +9,40 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      getMe()
-        .then((res) => setUser(res.data.user))
-        .catch(() => localStorage.removeItem("token"))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    const demoUser = localStorage.getItem("demo-user");
+  
+    if (token && demoUser) {
+      setUser(JSON.parse(demoUser));
     }
+  
+    setLoading(false);
   }, []);
 
   async function login(username, password) {
-    const res = await apiLogin(username, password);
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
-    return res.data;
+    if (username === "admin" && password === "admin123") {
+      const demoUser = {
+        id: 1,
+        username: "admin",
+        name: "Administrator",
+        role: "Admin",
+      };
+  
+      localStorage.setItem("token", "demo-token");
+      localStorage.setItem("demo-user", JSON.stringify(demoUser));
+      setUser(demoUser);
+  
+      return {
+        token: "demo-token",
+        user: demoUser,
+      };
+    }
+  
+    throw new Error("Username atau password salah");
   }
 
   function logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("demo-user");
     setUser(null);
   }
 
